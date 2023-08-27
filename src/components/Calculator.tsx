@@ -33,7 +33,7 @@ const ResultItem: React.FC<{ title: string; value: string }> = ({
         {title}
       </Typography>
       <Typography
-        variant={isXs || value.length > 8 ? "h5" : "h4"}
+        variant={isXs || value?.length > 8 ? "h5" : "h4"}
         sx={{ fontWeight: 500 }}
       >
         {value}
@@ -43,6 +43,7 @@ const ResultItem: React.FC<{ title: string; value: string }> = ({
 };
 
 const CalculatorNew = () => {
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [accountBalance, setAccountBalance] = useState("100000");
   const [riskPercentage, setRiskPercentage] = useState("1");
@@ -122,6 +123,7 @@ const CalculatorNew = () => {
   return (
     <Box
       sx={{
+        width: "100%",
         height: "100%",
         px: { xs: 3, md: 5 },
         py: { xs: 4, md: 7 },
@@ -130,11 +132,14 @@ const CalculatorNew = () => {
       {/* Screen */}
       <NScreen>
         <Stack direction="row" justifyContent="space-evenly" spacing={2}>
-          <ResultItem title="Risk" value={`$${result.riskAmountUSD}`} />
+          <ResultItem
+            title="Risk"
+            value={`$${result?.riskAmountUSD || "0.00"}`}
+          />
 
           <Divider orientation="vertical" flexItem />
 
-          <ResultItem title="Lots" value={result.lotSize} />
+          <ResultItem title="Lots" value={result?.lotSize || "0"} />
         </Stack>
       </NScreen>
 
@@ -210,6 +215,17 @@ const CalculatorNew = () => {
 
       {/* Calculate Button */}
       <NButton onClick={handleSubmit}>Calculate</NButton>
+
+      {error && (
+        <Typography
+          component="p"
+          color="error"
+          variant="caption"
+          sx={{ textAlign: "center", mt: 1 }}
+        >
+          Please input all values correctly
+        </Typography>
+      )}
     </Box>
   );
 };
