@@ -20,7 +20,7 @@ import { symbols } from "../utils/symbols";
 
 const LS_NAME = "NEPPHEW_SAM_CALCULATOR";
 
-const ResultItem: React.FC<{ title: string; value: number | string }> = ({
+const ResultItem: React.FC<{ title: string; value: string }> = ({
   title,
   value,
 }) => {
@@ -32,7 +32,10 @@ const ResultItem: React.FC<{ title: string; value: number | string }> = ({
       <Typography variant="body2" sx={{ fontWeight: 500 }}>
         {title}
       </Typography>
-      <Typography variant={isXs ? "h5" : "h4"} sx={{ fontWeight: 500 }}>
+      <Typography
+        variant={isXs || value.length > 8 ? "h5" : "h4"}
+        sx={{ fontWeight: 500 }}
+      >
         {value}
       </Typography>
     </Stack>
@@ -120,7 +123,7 @@ const CalculatorNew = () => {
     >
       {/* Screen */}
       <NScreen>
-        <Stack direction="row" justifyContent="space-evenly">
+        <Stack direction="row" justifyContent="space-evenly" spacing={2}>
           <ResultItem title="Risk" value={`$${result.riskAmountUSD}`} />
 
           <Divider orientation="vertical" flexItem />
