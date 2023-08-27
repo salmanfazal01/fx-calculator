@@ -60,13 +60,13 @@ const CalculatorNew = () => {
 
   const handleSubmit = () => {
     const _result = calculatePositionSize(
-      parseInt(accountBalance),
-      parseInt(riskPercentage),
-      parseInt(slPips),
-      parseInt(tpPips),
+      parseFloat(accountBalance),
+      parseFloat(riskPercentage),
+      parseFloat(slPips),
+      parseFloat(tpPips),
       baseSymbol,
       quoteSymbol,
-      parseInt(customPipValue)
+      parseFloat(customPipValue)
     );
 
     setResult(_result);
@@ -113,6 +113,12 @@ const CalculatorNew = () => {
     }
   }, [baseSymbol, quoteSymbol]);
 
+  useEffect(() => {
+    if (riskPercentage.startsWith(".")) {
+      setRiskPercentage((old) => old.replace(".", "0."));
+    }
+  }, [riskPercentage]);
+
   return (
     <Box
       sx={{
@@ -138,18 +144,35 @@ const CalculatorNew = () => {
       >
         <NTextField
           label="Account Balance"
+          type="number"
+          inputProps={{
+            min: 0,
+            max: 100000000,
+          }}
           value={accountBalance}
           onChange={(e) => setAccountBalance(e.target.value)}
         />
 
         <NTextField
           label="Risk Percentage"
+          type="number"
+          inputProps={{
+            step: "0.5",
+            min: 0,
+            max: 100,
+          }}
           value={riskPercentage}
           onChange={(e) => setRiskPercentage(e.target.value)}
         />
 
         <NTextField
           label="SL Pips"
+          type="number"
+          inputProps={{
+            step: "1",
+            min: 0,
+            max: 100000000,
+          }}
           value={slPips}
           onChange={(e) => setSlPips(e.target.value)}
         />
@@ -174,6 +197,12 @@ const CalculatorNew = () => {
 
         <NTextField
           label="Pip Value"
+          type="number"
+          inputProps={{
+            step: "0.001",
+            min: 0,
+            max: 10,
+          }}
           value={customPipValue}
           onChange={(e) => setCustomPipValue(e.target.value)}
         />
