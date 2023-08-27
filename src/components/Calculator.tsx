@@ -1,23 +1,21 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
-  Button,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
-  TextField,
   Typography,
-  useMediaQuery,
+  Divider,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import NScreen from "./neumorphism/Screen";
 import {
   PositionSizeResult,
   calculatePositionSize,
   pipValue,
 } from "../utils/helpers";
+import NButton from "./neumorphism/Button";
+import NTextField from "./neumorphism/TextField";
+import NSelect from "./neumorphism/Select";
 import { symbols } from "../utils/symbols";
 
 const LS_NAME = "NEPPHEW_SAM_CALCULATOR";
@@ -25,41 +23,47 @@ const LS_NAME = "NEPPHEW_SAM_CALCULATOR";
 const ResultItem: React.FC<{ title: string; value: number | string }> = ({
   title,
   value,
-}) => (
-  <Stack spacing={1} sx={{ textAlign: "center" }}>
-    <Typography variant="body2">{title}</Typography>
-    <Typography variant="h5">{value}</Typography>
-  </Stack>
-);
-
-const Calculator = () => {
+}) => {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("sm"));
 
+  return (
+    <Stack spacing={1} sx={{ textAlign: "center", flex: 1 }}>
+      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+        {title}
+      </Typography>
+      <Typography variant={isXs ? "h5" : "h4"} sx={{ fontWeight: 500 }}>
+        {value}
+      </Typography>
+    </Stack>
+  );
+};
+
+const CalculatorNew = () => {
   const [loading, setLoading] = useState(true);
-  const [accountBalance, setAccountBalance] = useState(100000);
-  const [riskPercentage, setRiskPercentage] = useState(1);
-  const [slPips, setSlPips] = useState(10);
-  const [tpPips, setTpPips] = useState(30);
+  const [accountBalance, setAccountBalance] = useState("100000");
+  const [riskPercentage, setRiskPercentage] = useState("1");
+  const [slPips, setSlPips] = useState("10");
+  const [tpPips, setTpPips] = useState("30");
   const [baseSymbol, setBaseSymbol] = useState("EUR");
   const [quoteSymbol, setQuoteSymbol] = useState("USD");
-  const [customPipValue, setCustomPipValue] = useState(0);
+  const [customPipValue, setCustomPipValue] = useState("0");
 
   const [result, setResult] = useState<PositionSizeResult>({
-    riskAmountUSD: "$0.00",
+    riskAmountUSD: "0.00",
     lotSize: "0",
     potentialProfitUSD: "$0.00",
   });
 
   const handleSubmit = () => {
     const _result = calculatePositionSize(
-      accountBalance,
-      riskPercentage,
-      slPips,
-      tpPips,
+      parseInt(accountBalance),
+      parseInt(riskPercentage),
+      parseInt(slPips),
+      parseInt(tpPips),
       baseSymbol,
       quoteSymbol,
-      customPipValue
+      parseInt(customPipValue)
     );
 
     setResult(_result);
@@ -72,10 +76,10 @@ const Calculator = () => {
       if (_data) {
         const retrievedData = JSON.parse(_data);
 
-        setAccountBalance(retrievedData.accountBalance);
-        setRiskPercentage(retrievedData.riskPercentage);
-        setBaseSymbol(retrievedData.baseSymbol);
-        setQuoteSymbol(retrievedData.quoteSymbol);
+        setAccountBalance(retrievedData.accountBalance || "1000");
+        setRiskPercentage(retrievedData.riskPercentage || "1");
+        setBaseSymbol(retrievedData.baseSymbol || "EUR");
+        setQuoteSymbol(retrievedData.quoteSymbol || "USD");
 
         setLoading(false);
       }
@@ -99,163 +103,83 @@ const Calculator = () => {
 
   useEffect(() => {
     if (baseSymbol && quoteSymbol) {
-      setCustomPipValue(pipValue[`${baseSymbol}${quoteSymbol}`]);
+      const val = pipValue[`${baseSymbol}${quoteSymbol}`];
+      setCustomPipValue(String(val));
     } else {
-      setCustomPipValue(0.0001);
+      setCustomPipValue("0.0001");
     }
   }, [baseSymbol, quoteSymbol]);
 
   return (
     <Box
       sx={{
-        position: "relative",
         height: "100%",
-        px: { xs: 2, md: 3 },
-        py: { xs: 3, md: 5 },
+        px: { xs: 3, md: 5 },
+        py: { xs: 4, md: 7 },
       }}
     >
+      {/* Screen */}
+      <NScreen>
+        <Stack direction="row" justifyContent="space-evenly">
+          <ResultItem title="Risk" value={`$${result.riskAmountUSD}`} />
+
+          <Divider orientation="vertical" flexItem />
+
+          <ResultItem title="Lots" value={result.lotSize} />
+        </Stack>
+      </NScreen>
+
       <Stack
-        direction="row"
-        justifyContent="space-evenly"
-        sx={{
-          backgroundColor: "rgba(92,114,128,1)",
-          p: 3,
-          width: "100%",
-          borderRadius: "16px",
-          mb: 5,
-          boxShadow: "rgba(0, 0, 0, 0.35) 0px 0px 3px",
-        }}
+        sx={{ mt: { xs: 3, md: 4 }, mb: { xs: 4, md: 5 } }}
+        spacing={{ xs: 2, md: 3 }}
       >
-        <ResultItem title="Amount to Risk" value={`${result.riskAmountUSD}`} />
-
-        <Divider orientation="vertical" flexItem />
-
-        <ResultItem title="Standard Lots" value={result.lotSize} />
-
-        {/* <Divider orientation="vertical" flexItem />
-
-        <ResultItem
-          title="Potential Profit"
-          value={`$${result.potentialProfitUSD}`}
-        /> */}
-      </Stack>
-
-      <Stack spacing={3}>
-        {/* Account Balance */}
-        <TextField
+        <NTextField
           label="Account Balance"
-          fullWidth
-          size="small"
           value={accountBalance}
-          onChange={(e) =>
-            setAccountBalance(parseInt(e.target.value || "1000"))
-          }
+          onChange={(e) => setAccountBalance(e.target.value)}
         />
 
-        {/* Risk Percentage */}
-        <TextField
+        <NTextField
           label="Risk Percentage"
-          fullWidth
-          size="small"
           value={riskPercentage}
-          onChange={(e) => setRiskPercentage(parseInt(e.target.value || "1"))}
+          onChange={(e) => setRiskPercentage(e.target.value)}
         />
 
-        {/* SL Pips */}
-        <TextField
+        <NTextField
           label="SL Pips"
-          fullWidth
-          size="small"
-          type="number"
           value={slPips}
-          onChange={(e) => setSlPips(parseInt(e.target.value || "10"))}
+          onChange={(e) => setSlPips(e.target.value)}
         />
-
-        {/* TP Pips */}
-        {/* <TextField
-          label="TP Pips"
-          fullWidth
-          type="number"
-          value={tpPips}
-          onChange={(e) => setTpPips(parseInt(e.target.value || "30"))}
-        /> */}
 
         <Stack direction="row" alignItems="center" spacing={2}>
           {/* Base Symbol */}
-          <FormControl fullWidth size="small">
-            <InputLabel>Base Symbol</InputLabel>
-            <Select
-              value={baseSymbol}
-              label="Base Symbol"
-              onChange={(e) => setBaseSymbol(e.target.value)}
-            >
-              {symbols &&
-                Object.keys(symbols).map((_key) => {
-                  if (!symbols[_key].quote.length) return null;
-
-                  return (
-                    <MenuItem key={_key} value={_key}>
-                      {_key}
-                    </MenuItem>
-                  );
-                })}
-            </Select>
-          </FormControl>
+          <NSelect
+            label="Base Symbol"
+            items={Object.keys(symbols)}
+            value={baseSymbol}
+            onChange={(e: any) => setBaseSymbol(e.target.value)}
+          />
 
           {/* Quote Symbol */}
-          <FormControl fullWidth size="small">
-            <InputLabel>Quote Symbol</InputLabel>
-            <Select
-              value={quoteSymbol}
-              label="Quote Symbol"
-              onChange={(e) => setQuoteSymbol(e.target.value)}
-            >
-              {symbols?.[baseSymbol]?.quote?.map((quote: string) => (
-                <MenuItem key={quote} value={quote}>
-                  {quote}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <NSelect
+            label="Quote Symbol"
+            items={symbols?.[baseSymbol]?.quote || []}
+            value={quoteSymbol}
+            onChange={(e: any) => setQuoteSymbol(e.target.value)}
+          />
         </Stack>
 
-        {/* Pip Value */}
-        <TextField
-          label="Pip Value (change if your broker is different)"
-          fullWidth
-          size="small"
-          type="number"
+        <NTextField
+          label="Pip Value"
           value={customPipValue}
-          onChange={(e) =>
-            setCustomPipValue(parseInt(e.target.value || "0.0001"))
-          }
+          onChange={(e) => setCustomPipValue(e.target.value)}
         />
-
-        <Button
-          fullWidth
-          variant="outlined"
-          color="inherit"
-          sx={{ mt: { md: "40px!important" } }}
-          onClick={handleSubmit}
-        >
-          Calculate
-        </Button>
       </Stack>
 
-      <Box sx={{ position: "absolute", right: 0, left: 0, bottom: "24px" }}>
-        <Typography sx={{ textAlign: "center" }}>
-          Created by{" "}
-          <Typography
-            component="a"
-            href="https://twitter.com/Nephew_Sam_"
-            sx={{ color: "inherit" }}
-          >
-            Nephew_Sam_
-          </Typography>
-        </Typography>
-      </Box>
+      {/* Calculate Button */}
+      <NButton onClick={handleSubmit}>Calculate</NButton>
     </Box>
   );
 };
 
-export default Calculator;
+export default CalculatorNew;
